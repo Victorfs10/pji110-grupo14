@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h5 class="fw-bold mb-0">Comunicados</h5>
+  {% if current_user.perfil == 'professor' %}
+  <a href="{{ url_for('novo_comunicado') }}" class="btn btn-primary btn-sm">+ Novo comunicado</a>
+  {% endif %}
+</div>
+
+{% if comunicados %}
+  {% for c in comunicados %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="card-title fw-bold mb-1">{{ c.titulo }}</h6>
+          <small class="text-muted">
+            Por <strong>{{ c.autor.nome }}</strong> &middot;
+            {{ c.criado_em.strftime('%d/%m/%Y às %H:%M') }}
+          </small>
+        </div>
+        {% if current_user.perfil == 'professor' and c.autor_id == current_user.id %}
+        <div class="d-flex gap-1 ms-3 flex-shrink-0">
+          <a href="{{ url_for('editar_comunicado', comunicado_id=c.id) }}"
+             class="btn btn-outline-secondary btn-sm">Editar</a>
+          <form method="POST" action="{{ url_for('excluir_comunicado', comunicado_id=c.id) }}"
+                onsubmit="return confirm('Excluir este comunicado?')">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Excluir</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+
+      <p class="card-text mt-2" style="white-space: pre-wrap;">{{ c.conteudo }}</p>
+
+      {% if c.comentarios %}
+      <hr class="my-3">
+      <p class="small fw-semibold text-secondary mb-2">Comentários</p>
+      {% for cm in c.comentarios %}
+      <div class="d-flex gap-2 mb-2">
+        <span class="badge bg-secondary-subtle text-secondary-emphasis align-self-start mt-1">Pai</span>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="small fw-semibold">{{ cm.autor.nome }}</span>
+              <span class="text-muted small ms-1">· {{ cm.criado_em.strftime('%d/%m às %H:%M') }}</span>
+            </div>
+            {% if current_user.perfil == 'pai' and cm.autor_id == current_user.id %}
+            <div class="d-flex gap-1">
+              <a href="{{ url_for('editar_comentario', comentario_id=cm.id) }}"
+                 class="btn btn-outline-secondary btn-sm py-0 px-1" style="font-size: .75rem;">Editar</a>
+              <form method="POST" action="{{ url_for('excluir_comentario', comentario_id=cm.id) }}"
+                    onsubmit="return confirm('Excluir este comentário?')">
+                <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1"
+                        style="font-size: .75rem;">Excluir</button>
+              </form>
+            </div>
+            {% endif %}
+          </div>
+          <p class="mb-0 small" style="white-space: pre-wrap;">{{ cm.conteudo }}</p>
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      {% if current_user.perfil == 'pai' %}
+      <hr class="my-3">
+      <form method="POST" action="{{ url_for('comentar', comunicado_id=c.id) }}">
+        <div class="input-group input-group-sm">
+          <input type="text" name="conteudo" class="form-control"
+                 placeholder="Escreva um comentário..." required maxlength="500">
+          <button type="submit" class="btn btn-outline-primary">Enviar</button>
+        </div>
+      </form>
+      {% endif %}
+
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="text-center text-muted mt-5">
+    <p class="fs-5">Nenhum comunicado publicado ainda.</p>
+    {% if current_user.perfil == 'professor' %}
+    <a href="{{ url_for('novo_comunicado') }}" class="btn btn-outline-primary">Criar o primeiro comunicado</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

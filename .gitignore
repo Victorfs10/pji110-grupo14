@@ -1,0 +1,18 @@
+# Ambiente virtual
+.venv/
+
+# Banco de dados local
+instance/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Arquivos do editor
+.vscode/
+.idea/
+*.swp
+
+# uv
+.python-version
